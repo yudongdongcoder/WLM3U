@@ -8,6 +8,7 @@
 
 import UIKit
 import WLM3U
+import M3U8Kit
 
 class ViewController: UIViewController {
     
@@ -21,26 +22,43 @@ class ViewController: UIViewController {
     @IBOutlet weak var speedLabel2: UILabel!
     @IBOutlet weak var progressLabel2: UILabel!
     
+    let url1 = "https://hls.banyung.pw/m3u8.php?path=13ebf7b0cb27f8a15be7e76e95e5a252-20220916.m3u8"
+    
+    let url2 = "https://jisu-xhzy.com/videos/202208/08/62f0f645911a705ae4ef57df/7ca25f/index.m3u8"
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let url1 = "http://47.108.143.147/fs/v1/6570255ceb09709311cb152cdc565e12.m3u8"
-        let url2 = "http://47.108.143.147/fs/v1/6570255ceb09709311cb152cdc565e12.m3u8"
         
-        textView1.text = url1
-        textView2.text = url2
+        textView1?.text = url1
+        textView2?.text = url2
     }
     
     @IBAction func onDownloadButton(_ sender: UIButton) {
-        let url = URL(string: sender.tag == 0 ? textView1.text : textView2.text)!
+
+        
+        guard let url = URL(string: sender.tag == 0 ? url1 : url2) else {
+            return
+
+        }
+        guard let parse = try? M3U8PlaylistModel(url: url) else {
+            return
+        }
+        
+        var array: [URL] = []
+        guard let segmentList = parse.mainMediaPl.segmentList else { return  }
+//        let count = segmentList.count
+//        for index in 0..<count {
+//            array.append(segmentList.segmentInfo(at: index).mediaURL())
+//        }
+        array = parse.mainMediaPl.allSegmentURLs() as? [URL] ?? []
+        
         do {
             let workflow = try WLM3U.attach(url: url,
-                                            tsURL: { (path, url) -> URL? in
-                                                if path.hasSuffix(".ts") {
-                                                    return url.appendingPathComponent(path)
-                                                } else {
-                                                    return nil
-                                                }
+                                            size: array.count,
+                                            tsURL: {
+
+                return array
             },
                                             completion: { (result) in
                                                 switch result {

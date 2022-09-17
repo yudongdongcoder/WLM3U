@@ -1,14 +1,17 @@
 PODS:
   - Alamofire (5.1.0)
+  - M3U8Kit (1.0.2)
   - WLM3U (0.1.5):
-    - Alamofire
+    - Alamofire (~> 5.1)
 
 DEPENDENCIES:
+  - M3U8Kit
   - WLM3U (from `../`)
 
 SPEC REPOS:
   trunk:
     - Alamofire
+    - M3U8Kit
 
 EXTERNAL SOURCES:
   WLM3U:
@@ -16,8 +19,9 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: 9d5c5f602928e512395b30950c5984eca840093c
-  WLM3U: eb0658d87de88e2f89454cfc218ac09bc2f908cf
+  M3U8Kit: 6a0d55ba2e62e146f34f53276d7c3aa78ed4fc00
+  WLM3U: f388dceeee61781be6af7a11a5f4e18bc7d85677
 
-PODFILE CHECKSUM: 5ca7205dd70ca1d085c17830ab66e7a20579aa62
+PODFILE CHECKSUM: c7a91b8b717dcec1bf3a68bb1dbe64e280525b0a
 
-COCOAPODS: 1.9.1
+COCOAPODS: 1.11.3

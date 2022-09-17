@@ -4,4 +4,6 @@ use_frameworks!
 
 target 'WLM3U_Example' do
   pod 'WLM3U', :path => '../'
+  pod 'M3U8Kit'
+
 end

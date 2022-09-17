@@ -95,7 +95,7 @@ public let TaskErrorNotification: Notification.Name =
 /// String: A ts file path from the m3u file content.
 /// URL: The relative URL.
 /// URL?: URL of the slice file. Retuen `nil` if it is not a ts file.
-public typealias TsURLHandler = (String, URL) -> URL?
+public typealias TsURLHandler = () -> [URL]?
 
 /// A closure executed once a attach task has completed.
 /// Result<Model>: A Result instance of the attach task. The `Model` value is an object parsed from m3u file.

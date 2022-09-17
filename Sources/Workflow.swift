@@ -206,7 +206,8 @@ extension Workflow {
         let m3uStr = try String(contentsOf: file)
         let arr = m3uStr.components(separatedBy: "\n")
         if let handler = tsURLHandler {
-            model.tsArr = arr.compactMap { handler($0, uri) }
+//            model.tsArr = arr.compactMap { handler($0, uri) }
+            model.tsArr = handler()
         } else {
             model.tsArr = arr
                 .filter { $0.hasSuffix(".ts") }
@@ -290,11 +291,48 @@ extension Workflow {
                 return
             }
             self.waitingFiles = tsArr
+//            if (self.checkLoacl()) {
+//                self.downloadNextFile()
+//            }
             self.downloadNextFile()
             self.createTimer()
         }
         return self
     }
+    
+    private func checkLoacl() -> Bool {
+        
+        while(!waitingFiles.isEmpty) {
+            let fullURL = waitingFiles.removeFirst() // http://qq.com/123/hls/ts/200.ts
+            let fileName = fullURL.lastPathComponent // 200.ts
+            let fileLocalURL = tsDir!.appendingPathComponent(fileName)
+            
+            if fileManager!.fileExists(atPath: fileLocalURL.path) {
+                
+                do {
+                    let size = try fileManager!.attributesOfItem(atPath: fileLocalURL.path)[FileAttributeKey.size] as! Int64
+                    let progress = Progress(totalUnitCount: size)
+                    progress.completedUnitCount = size
+                    preCompletedCount += Int(size)
+                    progressDic[fullURL] = progress
+                    
+                } catch {
+                    handleCompletion(of: "download",
+                                     completion: downloadCompletion,
+                                     result: .failure(.handleCacheFailed(error)))
+                    return false
+                }
+            } else {
+                break
+            }
+        }
+        if self.waitingFiles.isEmpty{
+            allDownloadsDidFinished()
+            return false
+        }
+        return true
+    }
+    
     
     private func downloadNextFile() {
         
@@ -382,13 +420,15 @@ extension Workflow {
         
         guard let totalSize = model.totalSize, totalSize > 0 else { return }
         let progress = Progress(totalUnitCount: Int64(totalSize))
+        progress.completedUnitCount = Int64(totalSize - waitingFiles.count)
+        var completedUnitCount: Int64 = 0
         for pro in progressDic.values {
-            progress.completedUnitCount += pro.completedUnitCount
+            completedUnitCount += pro.completedUnitCount
         }
         
-        let completedCount = Int(progress.completedUnitCount) - preCompletedCount
+        let completedCount = Int(completedUnitCount) - preCompletedCount
         if completedCount < 0 { return }
-        preCompletedCount = Int(progress.completedUnitCount)
+        preCompletedCount = Int(completedUnitCount)
         downloadProgress?(progress, completedCount)
         NotificationCenter.default.post(name: TaskProgressNotification,
                                         object: self,
